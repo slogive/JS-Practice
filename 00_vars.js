@@ -15,3 +15,7 @@ colores.push("naranja");
 let nombre = "Cesar";
 
 console.log(nombre, nombre.length, nombre.toLowerCase(), nombre.includes("Cesar")); // Longitud del string
+
+console.log("Hola");
+
+
