@@ -1,0 +1,11 @@
+{
+    "cadena": "Cadena",
+    "numero": 0,
+    "boolean": true,
+    "arreglo": ["correr", "saltar", "programar"],
+    "objeto": {
+        "nombre": "Cesar",
+        "apellido": "Fonseca"
+    },
+    "nulo": null
+}
