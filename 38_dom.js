@@ -1,0 +1,30 @@
+console.log(window)
+console.log(document)
+console.log(document.documentElement)
+console.log(document.doctype)
+console.log(document.charset)
+console.log(document.title)
+console.log(document.links)
+console.log(document.images)
+console.log(document.styleSheets)
+console.log(document.scripts)
+console.log(document.getSelection().toString())
+
+console.group("querySelector")
+console.log(document.querySelector("div"))
+console.log(document.querySelectorAll("div"))
+console.groupEnd("querySelector")
+
+// console.log(document.querySelector(".dom-link").href)
+console.log(document.querySelector(".dom-link").href)
+console.log(document.querySelector(".dom-link").getAttribute("href"))
+console.log(document.querySelector(".dom-link"))
+
+console.log(document.documentElement.lang)
+document.documentElement.lang = "es";
+console.log(document.documentElement.lang)
+document.documentElement.setAttribute("lang", "ru");
+console.log(document.documentElement.lang)
+console.log(document.querySelector(".dom-link").hasAttribute("href"))
+console.log(document.querySelector(".dom-link").dataset)
+console.log(document.querySelector(".dom-link").dataset.description)
