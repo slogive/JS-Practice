@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CRUD Fetch</title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+
+            h1 {
+                padding: 10px;
+            } 
+            
+            h2 {
+                padding: 10px 0;
+            }
+
+            button {
+                outline: none;
+                border: none;
+            }
+
+            section section {
+                display: grid;
+                padding: 10px;
+            }
+
+            .crud-form {
+                display: grid;
+                /* border: solid 1px black; */
+                gap: 10px;
+            }
+
+            .crud-form > input {
+                outline: none;
+                text-align: center;
+                padding: 10px;
+            }
+
+            table {
+                border: 1px solid black;
+                padding: 10px;
+            }
+
+            table > thead > tr > th {
+                text-align: center;
+                padding-top: 12px;
+                padding-bottom: 12px;
+                background-color: #008cff;
+                color: white;
+                font-weight: bold;
+            }
+
+            table > tbody > tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            table > tbody > tr > td {
+                padding: 10px;
+            }
+
+            table > tbody > tr > .buttons {
+                display: grid;
+                gap: 10px;
+                /* grid-template-columns: repeat(2, 1fr); */
+            }
+
+            table > tbody > tr > .buttons > button {
+                padding: 5px 10px;
+                font-weight: bold;
+            }
+
+            table > tbody > tr > .buttons > button:hover {
+                cursor: pointer;
+            }
+
+            table > tbody > tr > .buttons > button[class="edit"] {
+                background-color: #77c06cbc;
+            }
+
+            table > tbody > tr > .buttons > button[class="delete"] {
+                background-color: #ff060688;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>CRUD Fetch</h1>
+        <section class="container">
+            <section class="">
+                <h2 class="crud-form-title">Ingresar un nuevo elemento</h2>
+
+                <form class="crud-form">
+                    <input
+                        type="text"
+                        name="title"
+                        placeholder="Titulo"
+                        required
+                    />
+                    <input
+                        type="text"
+                        name="post"
+                        placeholder="Cuerpo"
+                        required
+                    />
+                    <input type="submit" value="Enviar" />
+                    <input type="hidden" name="id" />
+                </form>
+            </section>
+
+            <section>
+                <h2>Visualizacion de elementos encontrados:</h2>
+                <table class="crud-table">
+                    <thead>
+                        <th>Titulo</th>
+                        <th>Cuerpo</th>
+                        <th>Acciones</th>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <template class="crud-template">
+                    <tr>
+                        <td class="title"></td>
+                        <td class="post"></td>
+                        <td class="buttons">
+                            <button class="edit">Editar</button>
+                            <button class="delete">Eliminar</button>
+                        </td>
+                    </tr>
+                </template>
+            </section>
+        </section>
+
+        <script>
+            const $form = document.querySelector(".crud-form"),
+                $formTitle = document.querySelector(".crud-form-title"),
+                $table = document.querySelector(".crud-table"),
+                $template = document.querySelector(".crud-template").content,
+                $fragment = document.createDocumentFragment(),
+                $fecthURL = "http://localhost:3000/post";
+
+            const getAll = async () => {
+                try {
+                    let res = await fetch($fecthURL);
+                    json = await res.json();
+
+                    if (!res.ok)
+                        throw {
+                            status: res.status,
+                            statusText: res.statusText,
+                        };
+
+                    json.forEach((el) => {
+                        $template.querySelector(".title").textContent =
+                            el.title;
+                        $template.querySelector(".post").textContent = el.post;
+
+                        $template.querySelector(".edit").dataset.id = el.id;
+                        $template.querySelector(".edit").dataset.title =
+                            el.title;
+                        $template.querySelector(".edit").dataset.post = el.post;
+
+                        $template.querySelector(".delete").dataset.id = el.id;
+
+                        let $clone = document.importNode($template, true);
+                        $fragment.appendChild($clone);
+                    });
+
+                    $table.querySelector("tbody").appendChild($fragment);
+                } catch (err) {
+                    let messange = err.statusText || "Ocurrio un error";
+
+                    $table.insertAdjacentHTML(
+                        "afterend",
+                        `<p><b>${err.status}: ${messange}</b></p>`
+                    );
+                }
+            };
+
+            document.addEventListener("DOMContentLoaded", getAll);
+
+            document.addEventListener("submit", async (e) => {
+                if (e.target === $form) {
+                    e.preventDefault();
+
+                    if (!e.target.id.value) {
+                        // Create Post | Post
+                        try {
+                            let options = {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-type":
+                                            "application/json; charset=utf-8",
+                                    },
+                                    body: JSON.stringify({
+                                        title: e.target.title.value,
+                                        post: e.target.post.value,
+                                    }),
+                                },
+                                res = await fetch($fecthURL, options);
+                            json = await res.json();
+
+                            if (!res.ok)
+                                throw {
+                                    status: res.status,
+                                    statusText: res.statusText,
+                                };
+
+                            location.reload();
+                        } catch (err) {
+                            let messange =
+                                err.statusText ||
+                                "Ocurrio un error al procesar los datos";
+
+                            $form.insertAdjacentHTML(
+                                "afterend",
+                                `<p><b>${err.status}: ${messange}</b></p>`
+                            );
+                        }
+                    } else {
+                        // Updating Post | Put
+                        try {
+                            let options = {
+                                    method: "PUT",
+                                    headers: {
+                                        "Content-type":
+                                            "application/json; charset=utf-8",
+                                    },
+                                    body: JSON.stringify({
+                                        title: e.target.title.value,
+                                        post: e.target.post.value,
+                                    }),
+                                },
+                                res = await fetch(
+                                    `${$fecthURL}/${e.target.id.value}`,
+                                    options
+                                );
+                            json = await res.json();
+
+                            if (!res.ok)
+                                throw {
+                                    status: res.status,
+                                    statusText: res.statusText,
+                                };
+
+                            location.reload();
+                        } catch (err) {
+                            let messange =
+                                err.statusText ||
+                                "Ocurrio un error al procesar los datos";
+
+                            $form.insertAdjacentHTML(
+                                "afterend",
+                                `<p><b>${err.status}: ${messange}</b></p>`
+                            );
+                        }
+                    }
+                }
+            });
+
+            document.addEventListener("click", async (e) => {
+                if (e.target.matches(".edit")) {
+                    ($formTitle.textContent = "Editar Post"),
+                        ($form.title.value = e.target.dataset.title);
+                    $form.post.value = e.target.dataset.post;
+                    $form.id.value = e.target.dataset.id;
+                }
+
+                if (e.target.matches(".delete")) {
+                    let isDelete = confirm(
+                        `¿Estas seguro que deseas eliminar el id ${e.target.dataset.id}?`
+                    );
+
+                    if (isDelete) {
+                        // Deleting Post | Delete
+                        try {
+                            let options = {
+                                    method: "DELETE",
+                                    headers: {
+                                        "Content-type":
+                                            "application/json; charset=utf-8",
+                                    },
+                                },
+                                res = await fetch(
+                                    `${$fecthURL}/${e.target.dataset.id}`,
+                                    options
+                                );
+                            json = await res.json();
+
+                            if (!res.ok)
+                                throw {
+                                    status: res.status,
+                                    statusText: res.statusText,
+                                };
+
+                            location.reload();
+                        } catch (err) {
+                            let messange =
+                                err.statusText ||
+                                "Ocurrio un error al procesar los datos";
+
+                            $form.alert(`${err.status}: ${messange}`);
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
